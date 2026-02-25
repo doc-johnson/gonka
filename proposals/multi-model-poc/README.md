@@ -16,10 +16,18 @@ The bitcoin-style part of reward distributed proportionally to this weight. On e
 
 ## Problem
 
-The chain must support multiple models
-Currently, there is single model used for PoC (Qwen3-235B-FP8). Therefore, chain also can't support another models for inference as it'd required to re-deploy model for POC (which is essentially impossible as it requires time and open network for attack when attacker deploy hardware only for POC phase).
+The chain must support multiple models.
 
-=> option with re-deploy must not be used
+Currently the chain can’t support multiple models because we have single-model PoC
+
+Why can’t we support multiple models with single-model PoC?
+
+If we serve multiple models with current single-model PoC, that means that you need to redeploy a model before each cPoC. And if you can do that - you can use this time to deploy models on new nodes. Which essentially opens the network for attack when attacker deploy hardware only for POC phase
+Why do we need cPoC at all?
+
+Because a) we want to make sure that if the network load is low - compute is still there b) until the quality of benchmarking hardware by the users’ inference itself is high enough 
+Thus the option of redeploying models for PoC vs inference can’t be used and we need to figure out how to support different models during PoC and cPoC.
+
 
 ## Proposal
 
