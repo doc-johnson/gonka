@@ -30,6 +30,7 @@ type BankKeeper interface {
 	SpendableCoins(context.Context, sdk.AccAddress) sdk.Coins
 	SpendableCoin(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	GetDenomMetaData(ctx context.Context, denom string) (banktypes.Metadata, bool)
+	SetDenomMetaData(ctx context.Context, denomMetaData banktypes.Metadata)
 	IterateAllBalances(ctx context.Context, cb func(address sdk.AccAddress, coin sdk.Coin) (stop bool))
 	GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins
 }
@@ -82,7 +83,7 @@ type StakingKeeper interface {
 type CollateralKeeper interface {
 	AdvanceEpoch(ctx context.Context, completedEpoch uint64) error
 	GetCollateral(ctx context.Context, participant sdk.AccAddress) (collateral sdk.Coin, found bool)
-	Slash(ctx context.Context, participant sdk.AccAddress, slashFraction math.LegacyDec, reason string) (sdk.Coin, error)
+	Slash(ctx context.Context, participant sdk.AccAddress, slashFraction math.LegacyDec, reason string, requiredCollateral math.Int) (sdk.Coin, error)
 }
 
 // StreamVestingKeeper defines the expected interface for the StreamVesting module.

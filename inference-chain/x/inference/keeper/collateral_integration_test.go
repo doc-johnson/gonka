@@ -127,7 +127,7 @@ func setupRealKeepers(t testing.TB) (sdk.Context, keeper.Keeper, collateralKeepe
 	// Mock necessary bank calls
 	bookkepingBankMock.EXPECT().SendCoinsFromAccountToModule(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	bookkepingBankMock.EXPECT().SendCoinsFromModuleToAccount(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	bookkepingBankMock.EXPECT().BurnCoins(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+	bookkepingBankMock.EXPECT().SendCoinsFromModuleToModule(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	bookkepingBankMock.EXPECT().LogSubAccountTransaction(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 	return ctx, inferenceKeeper, cKeeper, inferenceMsgSrv, collateralMsgSrv, mocks
 }
@@ -155,7 +155,7 @@ func TestSlashingForInvalidStatus_Integration(t *testing.T) {
 	expectedSlashFraction, err := slashFraction.ToLegacyDec()
 	require.NoError(t, err)
 	mocks.CollateralKeeper.EXPECT().
-		Slash(gomock.Any(), participantAcc, expectedSlashFraction, types.SlashReasonInvalidation).
+		Slash(gomock.Any(), participantAcc, expectedSlashFraction, types.SlashReasonInvalidation, gomock.Any()).
 		Return(sdk.NewCoin(types.BaseCoin, math.NewInt(0)), nil).Times(1)
 
 	// Execute the function under test directly
@@ -190,7 +190,7 @@ func TestSlashingForDowntime_Integration(t *testing.T) {
 	expectedSlashFraction, err := slashFraction.ToLegacyDec()
 	require.NoError(t, err)
 	mocks.CollateralKeeper.EXPECT().
-		Slash(gomock.Any(), participantAcc, expectedSlashFraction, types.SlashReasonDowntime).
+		Slash(gomock.Any(), participantAcc, expectedSlashFraction, types.SlashReasonDowntime, gomock.Any()).
 		Return(sdk.NewCoin(types.BaseCoin, math.NewInt(0)), nil).Times(1)
 
 	// Execute the function under test directly
@@ -231,8 +231,8 @@ func TestInvalidateInference_FullFlow_WithStatefulMock(t *testing.T) {
 	// Mock Slash to modify our fake collateral
 	expectedSlashFraction, err := slashFraction.ToLegacyDec()
 	require.NoError(t, err)
-	mocks.CollateralKeeper.EXPECT().Slash(gomock.Any(), participantAcc, expectedSlashFraction, types.SlashReasonInvalidation).DoAndReturn(
-		func(ctx sdk.Context, pa sdk.AccAddress, fraction math.LegacyDec, reason string) (sdk.Coin, error) {
+	mocks.CollateralKeeper.EXPECT().Slash(gomock.Any(), participantAcc, expectedSlashFraction, types.SlashReasonInvalidation, gomock.Any()).DoAndReturn(
+		func(ctx sdk.Context, pa sdk.AccAddress, fraction math.LegacyDec, reason string, requiredCollateral math.Int) (sdk.Coin, error) {
 			slashedAmount := fakeCollateralAmount.ToLegacyDec().Mul(fraction).TruncateInt()
 			fakeCollateralAmount = fakeCollateralAmount.Sub(slashedAmount)
 			return sdk.NewCoin(types.BaseCoin, slashedAmount), nil
